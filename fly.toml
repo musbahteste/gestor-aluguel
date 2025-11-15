@@ -18,27 +18,38 @@ primary_region = "gru"
   release_command = "npx prisma migrate deploy"
 
 # Variáveis de ambiente que seu app precisa.
-# NÃO coloque sua DATABASE_URL aqui! Use 'flyctl secrets set' (veja abaixo).
+# NÃO coloque sua DATABASE_URL aqui! Use 'flyctl secrets set'
 [env]
   PORT = "3000"
   NODE_ENV = "production"
   HOSTNAME = "0.0.0.0" # Garante que o Next.js aceite conexões externas
 
 # Esta seção informa ao Fly como rotear o tráfego para seu app
-[http_service]
+# (Sintaxe atualizada para corrigir o aviso de 'ports')
+[[services]]
+  protocol = "tcp"
   internal_port = 3000
-  force_https = true
   auto_stop_machines = true  # Para automaticamente para economizar (em planos gratuitos)
   auto_start_machines = true # Inicia automaticamente quando recebe tráfego
   min_machines_running = 0   # Defina como 1 (ou mais) para produção "sempre ativa"
 
-  [http_service.concurrency]
+  [services.concurrency]
     type = "connections"
     soft_limit = 20
     hard_limit = 25
 
-# Verificação de saúde para garantir que seu app está rodando antes de
-# direcionar tráfego para ele.
+  # Mapeia a porta 80 (HTTP) para o seu app e força HTTPS
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  # Mapeia a porta 443 (HTTPS) para o seu app
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+# Verificação de saúde para garantir que seu app está rodando
 [[services.checks]]
   type = "tcp"
   port = 3000
