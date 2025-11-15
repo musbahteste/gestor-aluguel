@@ -7,8 +7,8 @@ primary_region = "gru"
 
 # Esta seção informa ao Fly para usar seu Dockerfile local para construir a imagem.
 [build]
-  # Como seu arquivo se chama 'Dockerfile', o Fly.io o encontrará automaticamente.
-  # Você não precisa especificar 'dockerfile = "Dockerfile"' aqui, a menos que tenha um nome diferente.
+  # Informa explicitamente ao Fly para usar seu Dockerfile.
+  dockerfile = "Dockerfile"
 
 # ESTA É A PARTE MAIS IMPORTANTE PARA O PRISMA
 # O 'release_command' é executado uma vez, após o build ser bem-sucedido,
