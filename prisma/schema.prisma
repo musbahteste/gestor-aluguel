@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Locador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cpf       String?  @unique
+  email     String?
+  telefone  String?
+  imoveis   Imovel[]
+  contratos Contrato[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Locatario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cpf       String?  @unique
+  email     String?
+  telefone  String?
+  contratos Contrato[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Imovel {
+  id          Int       @id @default(autoincrement())
+  titulo      String
+  descricao   String?
+  endereco    String
+  cidade      String?
+  bairro      String?
+  cep         String?
+  valorAluguel Float
+  area        Float?
+  quartos     Int?
+  banheiros   Int?
+  garagem     Boolean  @default(false)
+  locadorId   Int
+  locador     Locador  @relation(fields: [locadorId], references: [id])
+  contratos   Contrato[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContratoTemplate {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  conteudo  String   // armazena o template com placeholders (ex: {{locador.nome}})
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  contratos Contrato[]
+}
+
+model Contrato {
+  id             Int               @id @default(autoincrement())
+  templateId     Int?
+  template       ContratoTemplate? @relation(fields: [templateId], references: [id])
+  imovelId       Int
+  imovel         Imovel            @relation(fields: [imovelId], references: [id])
+  locadorId      Int
+  locador        Locador           @relation(fields: [locadorId], references: [id])
+  locatarioId    Int
+  locatario      Locatario         @relation(fields: [locatarioId], references: [id])
+  conteudoGerado String
+  dataGeracao    DateTime          @default(now())
+}

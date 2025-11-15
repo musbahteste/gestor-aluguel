@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  font-family: 'Geist', 'Geist Mono', Arial, Helvetica, sans-serif;
+  background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+  color: #222;
+  margin: 0;
+}
+
+.menu-lateral {
+  width: 240px;
+  background: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+  padding: 32px 16px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.menu-lateral a {
+  display: block;
+  padding: 12px 18px;
+  border-radius: 8px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.menu-lateral a:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+main {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1, h2, h3 {
+  font-family: 'Geist', Arial, sans-serif;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+form {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  padding: 32px;
+  margin-bottom: 32px;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+button {
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+button:hover {
+  background: linear-gradient(90deg, #6366f1 0%, #2563eb 100%);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.12);
+}
+
+ul, li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s;
+  max-width: 900px;
+  width: 100%;
+}
+.card:hover {
+  box-shadow: 0 4px 24px rgba(99,102,241,0.10);
+}
+.card pre, .card textarea {
+  font-size: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e7ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #6366f1;
+  border-radius: 8px;
+}
