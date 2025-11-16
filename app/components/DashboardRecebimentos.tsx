@@ -241,7 +241,7 @@ export default function DashboardRecebimentos() {
                       {item.imovel.titulo}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {item.imovel.locador.nome}
+                      {item.imovel.locador?.nome ?? ``}
                     </td>
                     <td className="px-6 py-4 text-sm text-right font-medium">
                       {formatCurrency(item.total)}
