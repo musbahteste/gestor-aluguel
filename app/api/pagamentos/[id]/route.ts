@@ -1,20 +1,28 @@
-import { NextResponse } from 'next/server';
+// 1. Importado "NextRequest" além do "NextResponse"
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  // 2. "request" agora é do tipo "NextRequest"
+  request: NextRequest,
+  // 3. O segundo argumento é "context", que contém os "params"
+  context: { params: { id: string } }
 ) {
   try {
     const data = await request.json();
-    const id = parseInt(params.id);
+    // 4. "id" é acessado via "context.params.id"
+    const id = parseInt(context.params.id);
 
     const pagamento = await prisma.pagamento.update({
       where: { id },
       data: {
         valor: data.valor ? parseFloat(data.valor) : undefined,
-        dataPagamento: data.dataPagamento ? new Date(data.dataPagamento) : undefined,
-        dataVencimento: data.dataVencimento ? new Date(data.dataVencimento) : null,
+        dataPagamento: data.dataPagamento
+          ? new Date(data.dataPagamento)
+          : undefined,
+        dataVencimento: data.dataVencimento
+          ? new Date(data.dataVencimento)
+          : null,
         descricao: data.descricao,
         metodo: data.metodo,
         status: data.status,
@@ -34,11 +42,14 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  // 2. "request" agora é do tipo "NextRequest"
+  request: NextRequest,
+  // 3. O segundo argumento é "context", que contém os "params"
+  context: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // 4. "id" é acessado via "context.params.id"
+    const id = parseInt(context.params.id);
 
     await prisma.pagamento.delete({
       where: { id },
@@ -55,11 +66,14 @@ export async function DELETE(
 }
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  // 2. "request" agora é do tipo "NextRequest"
+  request: NextRequest,
+  // 3. O segundo argumento é "context", que contém os "params"
+  context: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // 4. "id" é acessado via "context.params.id"
+    const id = parseInt(context.params.id);
 
     const pagamento = await prisma.pagamento.findUnique({
       where: { id },
