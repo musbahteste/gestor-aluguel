@@ -5,13 +5,19 @@ import { prisma } from '../../../../lib/prisma';
 export async function PUT(
   // 2. "request" agora é do tipo "NextRequest"
   request: NextRequest,
-  // 3. O segundo argumento é "context", que contém os "params"
+  // 3. O segundo argumento é o contexto da rota
   context: { params: { id: string } }
 ) {
   try {
     const data = await request.json();
-    // 4. "id" é acessado via "context.params.id"
     const id = parseInt(context.params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'ID de pagamento inválido' },
+        { status: 400 }
+      );
+    }
 
     const pagamento = await prisma.pagamento.update({
       where: { id },
@@ -44,12 +50,18 @@ export async function PUT(
 export async function DELETE(
   // 2. "request" agora é do tipo "NextRequest"
   request: NextRequest,
-  // 3. O segundo argumento é "context", que contém os "params"
-  context: { params: { id: string } }
+  // 3. O segundo argumento é o contexto da rota
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 4. "id" é acessado via "context.params.id"
-    const id = parseInt(context.params.id);
+    const id = parseInt((await context.params).id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'ID de pagamento inválido' },
+        { status: 400 }
+      );
+    }
 
     await prisma.pagamento.delete({
       where: { id },
@@ -68,12 +80,18 @@ export async function DELETE(
 export async function GET(
   // 2. "request" agora é do tipo "NextRequest"
   request: NextRequest,
-  // 3. O segundo argumento é "context", que contém os "params"
+  // 3. O segundo argumento é o contexto da rota
   context: { params: { id: string } }
 ) {
   try {
-    // 4. "id" é acessado via "context.params.id"
     const id = parseInt(context.params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'ID de pagamento inválido' },
+        { status: 400 }
+      );
+    }
 
     const pagamento = await prisma.pagamento.findUnique({
       where: { id },
