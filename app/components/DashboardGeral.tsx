@@ -13,8 +13,6 @@ import {
 } from 'recharts';
 import { DollarSign, TrendingDown, TrendingUp, Scale } from 'lucide-react';
 
-// Supondo que você tenha uma função formatCurrency em algum lugar.
-// Se não, você pode criar uma simples como:
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -33,6 +31,7 @@ interface DashboardData {
     recebimentos: number;
     gastos: number;
   }[];
+  imoveis: Imovel[];
 }
 
 interface Imovel {
@@ -45,54 +44,39 @@ export default function DashboardGeral() {
   const [loading, setLoading] = useState(true);
   const [mes, setMes] = useState<string>(String(new Date().getMonth() + 1).padStart(2, '0'));
   const [ano, setAno] = useState<string>(String(new Date().getFullYear()));
-  const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [imovelId, setImovelId] = useState<string>(''); // '' para "Todos"
 
-  // Efeito para buscar a lista de imóveis uma vez
   useEffect(() => {
-    const fetchImoveis = async () => {
+    const fetchDashboard = async () => {
+      setLoading(true);
       try {
-        const res = await fetch('/api/imoveis');
-        const data = await res.json();
-        setImoveis(data);
+        const url = `/api/dashboard/geral?mes=${mes}&ano=${ano}&imovelId=${imovelId}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error('Falha ao buscar dados da API');
+        }
+        const dashboardData = await res.json();
+        setData(dashboardData);
       } catch (error) {
-        console.error('Erro ao buscar imóveis:', error);
+        console.error('Erro ao buscar dados do dashboard:', error);
+        setData(null);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchImoveis();
-  }, []);
 
-  useEffect(() => {
     fetchDashboard();
   }, [mes, ano, imovelId]);
 
-  const fetchDashboard = async () => {
-    setLoading(true);
-    try {
-      const url = `/api/dashboard/geral?mes=${mes}&ano=${ano}&imovelId=${imovelId}`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error('Falha ao buscar dados da API');
-      }
-      const dashboardData = await res.json();
-      setData(dashboardData);
-    } catch (error) {
-      console.error('Erro ao buscar dados do dashboard:', error);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
-    return <div className="text-center py-10">Carregando dashboard...</div>;
+    return <div className="text-center py-10">Carregando...</div>;
   }
 
   if (!data) {
     return <div className="text-center py-10 text-red-500">Erro ao carregar os dados.</div>;
   }
 
-  const { resumoAtual, historicoAnual } = data;
+  const { resumoAtual, historicoAnual, imoveis } = data;
 
   return (
     <div className="p-4 md:p-8 space-y-8">

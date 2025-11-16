@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 
 function preencherTemplate(template: string, imovel: any, locador: any, locatario: any) {
+  const opcoes = {
+    day: 'numeric',   // '16'
+    month: 'long',    // 'novembro'
+    year: 'numeric'   // '2025'
+  } as const;;
   return template
     .replace(/{{imovel.titulo}}/g, imovel.titulo)
     .replace(/{{imovel.descricao}}/g, imovel.descricao || '')
@@ -21,8 +26,12 @@ function preencherTemplate(template: string, imovel: any, locador: any, locatari
     .replace(/{{locatario.nome}}/g, locatario.nome)
     .replace(/{{locatario.cpf}}/g, locatario.cpf || '')
     .replace(/{{locatario.email}}/g, locatario.email || '')
-    .replace(/{{locatario.telefone}}/g, locatario.telefone || '');
+    .replace(/{{locatario.telefone}}/g, locatario.telefone || '')
+    .replace(/{{contrato.dataGeracao}}/g, new Date().toLocaleDateString('pt-BR'))
+    .replace(/{{contrato.dataGeracaoExtenso}}/g, new Date().toLocaleDateString('pt-BR', opcoes));
 }
+
+
 
 export async function GET() {
   const contratos = await prisma.contrato.findMany({ include: { imovel: true, locador: true, locatario: true, template: true } });

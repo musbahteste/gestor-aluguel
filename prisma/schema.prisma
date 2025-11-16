@@ -46,8 +46,8 @@ model Imovel {
   quartos     Int?
   banheiros   Int?
   garagem     Boolean  @default(false)
-  locadorId   Int
-  locador     Locador  @relation(fields: [locadorId], references: [id])
+  locadorId   Int?
+  locador     Locador?  @relation(fields: [locadorId], references: [id])
   contratos   Contrato[]
   pagamentos  Pagamento[]
   gastos      Gasto[]
@@ -66,8 +66,8 @@ model ContratoTemplate {
 
 model Contrato {
   id             Int               @id @default(autoincrement())
-  templateId     Int?
-  template       ContratoTemplate? @relation(fields: [templateId], references: [id])
+  templateId     Int
+  template       ContratoTemplate  @relation(fields: [templateId], references: [id])
   imovelId       Int
   imovel         Imovel            @relation(fields: [imovelId], references: [id])
   locadorId      Int

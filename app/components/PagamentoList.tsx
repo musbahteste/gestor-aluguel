@@ -144,7 +144,7 @@ export default function PagamentoList({ refresh }: { refresh?: boolean }) {
               {pagamentos.map(pagamento => (
                 <tr key={pagamento.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm">{pagamento.imovel.titulo}</td>
-                  <td className="px-6 py-4 text-sm">{pagamento.imovel.locador.nome}</td>
+                  <td className="px-6 py-4 text-sm">{pagamento.imovel.locador?.nome ?? ``}</td>
                   <td className="px-6 py-4 text-sm font-medium">
                     {formatCurrency(pagamento.valor)}
                   </td>

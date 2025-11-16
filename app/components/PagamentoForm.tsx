@@ -104,7 +104,7 @@ export default function PagamentoForm({ onSave }: { onSave?: () => void }) {
               <option value="">Selecione um imóvel</option>
               {imoveis.map(imovel => (
                 <option key={imovel.id} value={imovel.id}>
-                  {imovel.titulo} - {imovel.locador.nome}
+                  {imovel.titulo}
                 </option>
               ))}
             </select>

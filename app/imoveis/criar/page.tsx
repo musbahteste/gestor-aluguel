@@ -1,10 +1,11 @@
-import ImovelForm from '../../components/ImovelForm';
+import ImovelForm from '@/app/components/ImovelForm';
+import PageWrapper from '@/app/components/PageWrapper';
 
 export default function CriarImovelPage() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Cadastrar Imóvel</h1>
+    <PageWrapper title="Cadastrar Novo Imóvel">
       <ImovelForm />
-    </main>
+    </PageWrapper>
   );
 }
+

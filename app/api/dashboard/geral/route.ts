@@ -6,10 +6,23 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const mesParam = searchParams.get('mes');
     const anoParam = searchParams.get('ano');
+    const imovelIdParam = searchParams.get('imovelId');
 
     const hoje = new Date();
     const mesAtual = mesParam ? parseInt(mesParam) : hoje.getMonth() + 1;
     const anoAtual = anoParam ? parseInt(anoParam) : hoje.getFullYear();
+
+    // --- Busca a lista de imóveis (para o filtro) ---
+    const imoveis = await prisma.imovel.findMany({
+      select: { id: true, titulo: true },
+      orderBy: { titulo: 'asc' },
+    });
+
+    // --- Base para filtros ---
+    const whereClause: { [key: string]: any } = {};
+    if (imovelIdParam) {
+      whereClause.imovelId = parseInt(imovelIdParam);
+    }
 
     // --- Resumo do Mês Selecionado ---
     const dataInicioMes = new Date(anoAtual, mesAtual - 1, 1);
@@ -18,6 +31,7 @@ export async function GET(request: Request) {
     const totalRecebidoMes = await prisma.pagamento.aggregate({
       _sum: { valor: true },
       where: {
+        ...whereClause,
         status: 'recebido',
         dataPagamento: {
           gte: dataInicioMes,
@@ -29,6 +43,7 @@ export async function GET(request: Request) {
     const totalGastoMes = await prisma.gasto.aggregate({
       _sum: { valor: true },
       where: {
+        ...whereClause,
         dataGasto: {
           gte: dataInicioMes,
           lte: dataFimMes,
@@ -56,13 +71,14 @@ export async function GET(request: Request) {
         prisma.pagamento.aggregate({
           _sum: { valor: true },
           where: {
+            ...whereClause,
             status: 'recebido',
             dataPagamento: { gte: dataInicio, lte: dataFim },
           },
         }),
         prisma.gasto.aggregate({
           _sum: { valor: true },
-          where: { dataGasto: { gte: dataInicio, lte: dataFim } },
+          where: { ...whereClause, dataGasto: { gte: dataInicio, lte: dataFim } },
         }),
       ]);
 
@@ -76,6 +92,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       resumoAtual,
       historicoAnual,
+      imoveis, // Adiciona a lista de imóveis na resposta
     });
 
   } catch (error) {

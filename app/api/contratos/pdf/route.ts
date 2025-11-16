@@ -13,6 +13,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Contrato não encontrado' }, { status: 404 });
   }
 
+  // Função para formatar a data
+  const dataGeracao = new Date(contrato.dataGeracao);
+  const dataFormatada = dataGeracao.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  const dataPorExtenso = dataGeracao.toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const pageHeight = 842;
@@ -30,8 +44,12 @@ export async function POST(request: Request) {
 
   y -= 40;
 
+  // Substitui as variáveis de data no conteúdo do contrato
+  const conteudoFinal = contrato.conteudoGerado
+    .replace(/{{contrato.dataGeracao}}/g, dataFormatada)
+    .replace(/{{contrato.dataGeracaoExtenso}}/g, dataPorExtenso);
   // Quebra o texto em blocos separados por linhas em branco
-  const blocks = contrato.conteudoGerado.split(/\n\s*\n/);
+  const blocks = conteudoFinal.split(/\n\s*\n/);
   const lineHeight = 16;
   const fontSize = 12;
   const maxWidth = pageWidth - 100;

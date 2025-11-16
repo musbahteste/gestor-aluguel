@@ -41,6 +41,7 @@ const templateVariables = {
     color: 'bg-gray-100 text-gray-800',
     items: [
       { label: 'Data de Geração', value: '{{contrato.dataGeracao}}' },
+      { label: 'Data de Geração (Extenso)', value: '{{contrato.dataGeracaoExtenso}}' },
     ],
   },
 };

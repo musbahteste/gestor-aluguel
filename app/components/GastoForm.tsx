@@ -112,7 +112,7 @@ export default function GastoForm({ onSave }: { onSave?: () => void }) {
               <option value="">Selecione um imóvel</option>
               {imoveis.map(imovel => (
                 <option key={imovel.id} value={imovel.id}>
-                  {imovel.titulo} - {imovel.locador.nome}
+                  {imovel.titulo} - {imovel.locador?.nome ?? ``}
                 </option>
               ))}
             </select>
