@@ -46,7 +46,7 @@ COPY --from=builder /app/public ./public
 
 # Copia o arquivo de configuração do Next.js (se existir)
 # Use 'COPY --from=builder /app/next.config.mjs ./' se você usar a versão .mjs
-COPY --from=builder /app/next.config.mjs ./
+COPY --from=builder /app/next.config.ts ./
 
 # Expõe a porta que o Next.js roda (e que o fly.toml espera)
 EXPOSE 3000
