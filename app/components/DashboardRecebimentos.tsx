@@ -134,7 +134,7 @@ export default function DashboardRecebimentos() {
               <option value="">Todos os imóveis</option>
               {imoveis.map(imovel => (
                 <option key={imovel.id} value={imovel.id}>
-                  {imovel.titulo} - {imovel.locador.nome}
+                  {imovel.titulo} - {imovel.locador?.nome ?? ``}
                 </option>
               ))}
             </select>
