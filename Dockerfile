@@ -3,9 +3,6 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Define o ambiente para produção (boa prática para 'npm install')
-ENV NODE_ENV=production
-
 # Copia os arquivos de dependência e instala
 # Isso aproveita o cache do Docker, só reinstala se package*.json mudar
 COPY package*.json ./

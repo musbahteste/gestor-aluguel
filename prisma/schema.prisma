@@ -2,8 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -50,6 +49,8 @@ model Imovel {
   locadorId   Int
   locador     Locador  @relation(fields: [locadorId], references: [id])
   contratos   Contrato[]
+  pagamentos  Pagamento[]
+  gastos      Gasto[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -75,4 +76,32 @@ model Contrato {
   locatario      Locatario         @relation(fields: [locatarioId], references: [id])
   conteudoGerado String
   dataGeracao    DateTime          @default(now())
+}
+
+model Pagamento {
+  id           Int      @id @default(autoincrement())
+  imovelId     Int
+  imovel       Imovel   @relation(fields: [imovelId], references: [id])
+  valor        Float
+  dataPagamento DateTime
+  dataVencimento DateTime?
+  descricao    String?
+  metodo       String   // "dinheiro", "cheque", "transferencia", "pix"
+  status       String   @default("recebido") // "recebido", "pendente", "atrasado"
+  comprovante  String?  // URL ou caminho do arquivo
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Gasto {
+  id        Int      @id @default(autoincrement())
+  imovelId  Int
+  imovel    Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  tipo      String   // "pintura", "iptu", "manutencao", "limpeza", "reparos", "outro"
+  descricao String?
+  valor     Float
+  dataGasto DateTime
+  arquivo   String?  // URL ou caminho do arquivo/comprovante
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 export async function POST(request: Request) {
