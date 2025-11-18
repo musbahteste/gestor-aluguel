@@ -12,10 +12,11 @@ COPY package*.json ./
 # Instala as dependências originais
 RUN npm install
 
-# --- FIX FINAL: ATUALIZAR PARA LATEST ---
-# Versões antigas (5.9, 5.10) estão retornando erro 500 na CDN.
-# Forçamos a atualização para a versão MAIS RECENTE disponível para garantir binários ativos.
-RUN npm install prisma@latest @prisma/client@latest
+# --- FIX FINAL: FORÇAR VERSÃO PARA 6.0.0 ---
+# O hash do commit 2ba551f (Prisma 5.10.0) está inativo na CDN.
+# Forçamos a instalação da versão 6.0.0 para garantir que um novo hash de commit seja usado,
+# que buscará binários ativos na CDN.
+RUN npm install prisma@6.0.0 @prisma/client@6.0.0 --save-exact
 
 # Copia o schema do Prisma
 COPY prisma ./prisma/
@@ -44,7 +45,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copia os arquivos de dependência ATUALIZADOS pelo builder
-# (Isso garante que a produção use a mesma versão 'latest' instalada acima)
+# (Isso garante que a produção use a mesma versão '6.0.0' instalada acima)
 COPY --from=builder /app/package*.json ./
 
 # Instala dependências de produção
