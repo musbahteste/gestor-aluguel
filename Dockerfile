@@ -1,48 +1,50 @@
 # --- 1. Estágio de Build (Builder) ---
-# Usa node:20-alpine como base, que é leve
-FROM node:20-alpine AS builder
+# Trocamos alpine por slim para evitar o erro de download do binário musl
+FROM node:20-slim AS builder
+
+# Instala OpenSSL (Obrigatório para o Prisma em imagens Debian/Slim)
+RUN apt-get update -y && apt-get install -y openssl
+
 WORKDIR /app
 
-# (REMOVEMOS O "ENV NODE_ENV=production" DAQUI PARA CORRIGIR O BUILD)
-
-# Copia os arquivos de dependência e instala TODAS as dependências (dev + prod)
-# Isso aproveita o cache do Docker, só reinstala se package*.json mudar
+# Copia os arquivos de dependência
 COPY package*.json ./
+
+# Instala TODAS as dependências
 RUN npm install
 
 # Copia o schema do Prisma
 COPY prisma ./prisma/
 
 # Copia o restante do código-fonte
-# (O .dockerignore deve ser usado para pular node_modules, .env, .git, etc.)
 COPY . .
 
-# Add this line BEFORE 'npx prisma generate'
-ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-
-# Gera o Prisma Client (necessário para o build do Next.js)
+# Gera o Prisma Client 
+# (Agora baixará a versão debian-openssl que está funcionando)
 RUN npx prisma generate
 
 # Roda o build de produção do Next.js
-# (Seu next.config.ts irá ignorar os erros de tipo)
 RUN npm run build
 
 # --- 2. Estágio de Produção (Runner) ---
-# Inicia de uma nova imagem base limpa (CORREÇÃO DO ERRO "builder:latest")
-FROM node:20-alpine AS runner
+# Também usamos slim aqui para manter compatibilidade
+FROM node:20-slim AS runner
+
+# Instala OpenSSL na produção também (necessário para o Prisma rodar)
+RUN apt-get update -y && apt-get install -y openssl
+
 WORKDIR /app
 
-# Define o ambiente para produção (essencial para o Next.js)
+# Define o ambiente para produção
 ENV NODE_ENV=production
 
 # Copia apenas os package*.json do builder
 COPY --from=builder /app/package*.json ./
 
 # Instala SOMENTE as dependências de produção
-# Isso cria uma imagem final muito menor
 RUN npm install --omit=dev
 
-# Copia o CLIENTE PRISMA GERADO do builder (CORREÇÃO DO ERRO "prisma generate")
+# Copia o CLIENTE PRISMA GERADO do builder
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copia o schema do Prisma
@@ -52,11 +54,11 @@ COPY --from=builder /app/prisma ./prisma/
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Copia o arquivo de configuração do Next.js (CORREÇÃO DO NOME DO ARQUIVO)
+# Copia o arquivo de configuração
 COPY --from=builder /app/next.config.ts ./
 
-# Expõe a porta que o Next.js roda
+# Expõe a porta
 EXPOSE 3000
 
-# Comando para iniciar o servidor Next.js em produção
+# Comando para iniciar
 CMD ["npm", "start"]
