@@ -1,9 +1,10 @@
 # --- 1. Estágio de Build (Builder) ---
-# Trocamos alpine por slim para evitar o erro de download do binário musl
-FROM node:20-slim AS builder
+# MUDANÇA CRÍTICA: Usamos 'bullseye-slim' em vez de 'slim'.
+# O 'slim' padrão usa Debian Bookworm (OpenSSL 3.0), que está com os arquivos corrompidos na CDN do Prisma.
+# O 'bullseye' usa OpenSSL 1.1, que forçará o Prisma a baixar um binário diferente (funcional).
+FROM node:20-bullseye-slim AS builder
 
-# Instala OpenSSL (Obrigatório para o Prisma em imagens Debian/Slim)
-# Adicionado ca-certificates para garantir conexões SSL seguras
+# Instala OpenSSL (necessário) e ca-certificates
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
@@ -21,21 +22,21 @@ COPY prisma ./prisma/
 COPY . .
 
 # --- FIX: IGNORAR CHECKSUM ---
-# Como estamos no Debian (Slim), o binário existe, mas o checksum está falhando (erro 500).
-# Essa variável força o Prisma a pular a validação e usar o arquivo baixado.
+# Mantemos isso por segurança, caso o erro de checksum persista no binário do OpenSSL 1.1
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
-# Gera o Prisma Client 
+# Gera o Prisma Client
+# Agora ele deve buscar o engine 'debian-openssl-1.1.x' em vez do 3.0.x
 RUN npx prisma generate
 
 # Roda o build de produção do Next.js
 RUN npm run build
 
 # --- 2. Estágio de Produção (Runner) ---
-# Também usamos slim aqui para manter compatibilidade
-FROM node:20-slim AS runner
+# MUDANÇA CRÍTICA: Devemos usar a mesma base 'bullseye-slim' na produção
+FROM node:20-bullseye-slim AS runner
 
-# Instala OpenSSL na produção também (necessário para o Prisma rodar)
+# Instala OpenSSL na produção também
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
