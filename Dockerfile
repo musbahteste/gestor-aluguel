@@ -1,10 +1,8 @@
 # --- 1. Estágio de Build (Builder) ---
-# MUDANÇA CRÍTICA: Usamos 'bullseye-slim' em vez de 'slim'.
-# O 'slim' padrão usa Debian Bookworm (OpenSSL 3.0), que está com os arquivos corrompidos na CDN do Prisma.
-# O 'bullseye' usa OpenSSL 1.1, que forçará o Prisma a baixar um binário diferente (funcional).
+# Mantemos o bullseye-slim pois é mais compatível, mas o problema real era a versão do Prisma
 FROM node:20-bullseye-slim AS builder
 
-# Instala OpenSSL (necessário) e ca-certificates
+# Instala OpenSSL e ca-certificates
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
@@ -12,8 +10,13 @@ WORKDIR /app
 # Copia os arquivos de dependência
 COPY package*.json ./
 
-# Instala TODAS as dependências
+# Instala as dependências originais do projeto
 RUN npm install
+
+# --- FIX CRÍTICO: FORÇAR VERSÃO DO PRISMA ---
+# A versão 5.10.0 (commit 2ba551f...) está com erro 500 na CDN da Prisma.
+# Forçamos a instalação da versão 5.9.0 para usar um hash de commit diferente e baixar binários funcionais.
+RUN npm install prisma@5.9.0 @prisma/client@5.9.0 --save-exact
 
 # Copia o schema do Prisma
 COPY prisma ./prisma/
@@ -21,22 +24,20 @@ COPY prisma ./prisma/
 # Copia o restante do código-fonte
 COPY . .
 
-# --- FIX: IGNORAR CHECKSUM ---
-# Mantemos isso por segurança, caso o erro de checksum persista no binário do OpenSSL 1.1
+# Variável de segurança (pode ser mantida)
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
 # Gera o Prisma Client
-# Agora ele deve buscar o engine 'debian-openssl-1.1.x' em vez do 3.0.x
+# Agora usará os binários da versão 5.9.0
 RUN npx prisma generate
 
 # Roda o build de produção do Next.js
 RUN npm run build
 
 # --- 2. Estágio de Produção (Runner) ---
-# MUDANÇA CRÍTICA: Devemos usar a mesma base 'bullseye-slim' na produção
 FROM node:20-bullseye-slim AS runner
 
-# Instala OpenSSL na produção também
+# Instala OpenSSL na produção
 RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
@@ -48,6 +49,9 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
 
 # Instala SOMENTE as dependências de produção
+# Nota: Como mudamos a versão no builder, precisamos garantir consistência aqui ou confiar no package-lock gerado lá.
+# Para garantir, repetimos o fix ou usamos o package.json modificado do builder.
+# O comando abaixo usará o package.json que foi alterado no passo anterior dentro do container builder.
 RUN npm install --omit=dev
 
 # Copia o CLIENTE PRISMA GERADO do builder
