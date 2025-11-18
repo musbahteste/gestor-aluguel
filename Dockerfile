@@ -3,7 +3,8 @@
 FROM node:20-slim AS builder
 
 # Instala OpenSSL (Obrigatório para o Prisma em imagens Debian/Slim)
-RUN apt-get update -y && apt-get install -y openssl
+# Adicionado ca-certificates para garantir conexões SSL seguras
+RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
 
@@ -19,8 +20,12 @@ COPY prisma ./prisma/
 # Copia o restante do código-fonte
 COPY . .
 
+# --- FIX: IGNORAR CHECKSUM ---
+# Como estamos no Debian (Slim), o binário existe, mas o checksum está falhando (erro 500).
+# Essa variável força o Prisma a pular a validação e usar o arquivo baixado.
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+
 # Gera o Prisma Client 
-# (Agora baixará a versão debian-openssl que está funcionando)
 RUN npx prisma generate
 
 # Roda o build de produção do Next.js
@@ -31,7 +36,7 @@ RUN npm run build
 FROM node:20-slim AS runner
 
 # Instala OpenSSL na produção também (necessário para o Prisma rodar)
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl ca-certificates
 
 WORKDIR /app
 
