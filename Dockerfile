@@ -17,6 +17,9 @@ COPY prisma ./prisma/
 # (O .dockerignore deve ser usado para pular node_modules, .env, .git, etc.)
 COPY . .
 
+# Add this line BEFORE 'npx prisma generate'
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+
 # Gera o Prisma Client (necessário para o build do Next.js)
 RUN npx prisma generate
 
