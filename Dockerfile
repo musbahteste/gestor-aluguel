@@ -1,5 +1,4 @@
 # --- 1. Estágio de Build (Builder) ---
-# Mantemos o bullseye-slim pois é mais compatível, mas o problema real era a versão do Prisma
 FROM node:20-bullseye-slim AS builder
 
 # Instala OpenSSL e ca-certificates
@@ -10,13 +9,13 @@ WORKDIR /app
 # Copia os arquivos de dependência
 COPY package*.json ./
 
-# Instala as dependências originais do projeto
+# Instala as dependências originais
 RUN npm install
 
-# --- FIX CRÍTICO: FORÇAR VERSÃO DO PRISMA ---
-# A versão 5.10.0 (commit 2ba551f...) está com erro 500 na CDN da Prisma.
-# Forçamos a instalação da versão 5.9.0 para usar um hash de commit diferente e baixar binários funcionais.
-RUN npm install prisma@5.9.0 @prisma/client@5.9.0 --save-exact
+# --- FIX FINAL: ATUALIZAR PARA LATEST ---
+# Versões antigas (5.9, 5.10) estão retornando erro 500 na CDN.
+# Forçamos a atualização para a versão MAIS RECENTE disponível para garantir binários ativos.
+RUN npm install prisma@latest @prisma/client@latest
 
 # Copia o schema do Prisma
 COPY prisma ./prisma/
@@ -24,11 +23,10 @@ COPY prisma ./prisma/
 # Copia o restante do código-fonte
 COPY . .
 
-# Variável de segurança (pode ser mantida)
+# Variável de segurança
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
-# Gera o Prisma Client
-# Agora usará os binários da versão 5.9.0
+# Gera o Prisma Client com a versão nova
 RUN npx prisma generate
 
 # Roda o build de produção do Next.js
@@ -45,13 +43,11 @@ WORKDIR /app
 # Define o ambiente para produção
 ENV NODE_ENV=production
 
-# Copia apenas os package*.json do builder
+# Copia os arquivos de dependência ATUALIZADOS pelo builder
+# (Isso garante que a produção use a mesma versão 'latest' instalada acima)
 COPY --from=builder /app/package*.json ./
 
-# Instala SOMENTE as dependências de produção
-# Nota: Como mudamos a versão no builder, precisamos garantir consistência aqui ou confiar no package-lock gerado lá.
-# Para garantir, repetimos o fix ou usamos o package.json modificado do builder.
-# O comando abaixo usará o package.json que foi alterado no passo anterior dentro do container builder.
+# Instala dependências de produção
 RUN npm install --omit=dev
 
 # Copia o CLIENTE PRISMA GERADO do builder
