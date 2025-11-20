@@ -45,13 +45,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copia os arquivos de dependência ATUALIZADOS pelo builder
-# (Isso garante que a produção use a mesma versão '6.0.0' instalada acima)
 COPY --from=builder /app/package*.json ./
 
-# Instala dependências de produção
+# Instala dependências de produção (o Prisma Client será copiado abaixo)
 RUN npm install --omit=dev
 
-# Copia o CLIENTE PRISMA GERADO do builder
+# === MUDANÇA PRINCIPAL AQUI ===
+
+# Copia a pasta COMPLETA do Prisma Client (inclui os arquivos JS/TS e engines)
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copia o schema do Prisma
