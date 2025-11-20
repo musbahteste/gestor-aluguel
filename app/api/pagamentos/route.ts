@@ -5,17 +5,17 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const imovelId = searchParams.get('imovelId');
+    const locatarioId = searchParams.get('locatarioId');
 
-    let query: any = {
-      include: { imovel: { include: { locador: true } } },
+    const where: any = {};
+    if (imovelId) where.imovelId = parseInt(imovelId);
+    if (locatarioId) where.locatarioId = parseInt(locatarioId);
+
+    const pagamentos = await prisma.pagamento.findMany({
+      where: Object.keys(where).length ? where : undefined,
+      include: { imovel: { include: { locador: true } }, locatario: true },
       orderBy: { dataPagamento: 'desc' },
-    };
-
-    if (imovelId) {
-      query.where = { imovelId: parseInt(imovelId) };
-    }
-
-    const pagamentos = await prisma.pagamento.findMany(query);
+    });
     return NextResponse.json(pagamentos);
   } catch (error) {
     console.error('Erro ao buscar pagamentos:', error);
@@ -40,8 +40,9 @@ export async function POST(request: Request) {
         metodo: data.metodo || 'transferencia',
         status: data.status || 'recebido',
         comprovante: data.comprovante || null,
+        locatarioId: data.locatarioId ? parseInt(data.locatarioId) : null,
       },
-      include: { imovel: { include: { locador: true } } },
+      include: { imovel: { include: { locador: true } }, locatario: true },
     });
 
     return NextResponse.json(pagamento, { status: 201 });

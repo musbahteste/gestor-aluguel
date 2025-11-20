@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const mes = searchParams.get('mes');
     const ano = searchParams.get('ano');
     const imovelId = searchParams.get('imovelId');
+    const locatarioId = searchParams.get('locatarioId');
 
     let whereClause: any = {};
 
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
       whereClause.imovelId = parseInt(imovelId);
     }
 
+    if (locatarioId) {
+      whereClause.locatarioId = parseInt(locatarioId);
+    }
+
     // Dados de pagamentos
     const pagamentos = await prisma.pagamento.findMany({
       where: whereClause,
@@ -36,22 +41,36 @@ export async function GET(request: Request) {
         imovel: {
           include: { locador: true },
         },
+        locatario: true,
       },
       orderBy: { dataPagamento: 'desc' },
     });
 
     // Calcular totais
+    // Normaliza status para lidar com variações (ex: 'PAGO' do frontend)
     const totalRecebido = pagamentos
-      .filter((p: any) => p.status === 'recebido')
+      .filter((p: any) => {
+        const s = String(p.status || '').toLowerCase();
+        return s === 'recebido' || s === 'pago' || s === 'paid' || s === 'confirmado';
+      })
       .reduce((sum: number, p: any) => sum + p.valor, 0);
 
     const totalPendente = pagamentos
-      .filter((p: any) => p.status === 'pendente')
+      .filter((p: any) => {
+        const s = String(p.status || '').toLowerCase();
+        return s === 'pendente' || s === 'pending';
+      })
       .reduce((sum: number, p: any) => sum + p.valor, 0);
 
     const totalAtrasado = pagamentos
-      .filter((p: any) => p.status === 'atrasado')
+      .filter((p: any) => {
+        const s = String(p.status || '').toLowerCase();
+        return s === 'atrasado' || s === 'overdue' || s === 'atrasado';
+      })
       .reduce((sum: number, p: any) => sum + p.valor, 0);
+
+    // Garante que totalGeral reflita a soma de todos os pagamentos retornados
+    const totalGeral = pagamentos.reduce((sum: number, p: any) => sum + p.valor, 0);
 
     // Agrupar por método de pagamento
     const porMetodo = pagamentos.reduce((acc: Record<string, number>, p: any) => {

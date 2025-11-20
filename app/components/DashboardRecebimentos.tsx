@@ -31,15 +31,18 @@ interface Imovel {
 export default function DashboardRecebimentos() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [locatarios, setLocatarios] = useState<{ id: number; nome: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [mes, setMes] = useState<string>(String(new Date().getMonth() + 1).padStart(2, '0'));
   const [ano, setAno] = useState<string>(String(new Date().getFullYear()));
   const [imovelSelecionado, setImovelSelecionado] = useState<string>('');
+  const [locatarioSelecionado, setLocatarioSelecionado] = useState<string>('');
 
   useEffect(() => {
     fetchImoveis();
+    fetchLocatarios();
     fetchDashboard();
-  }, [mes, ano, imovelSelecionado]);
+  }, [mes, ano, imovelSelecionado, locatarioSelecionado]);
 
   const fetchImoveis = async () => {
     try {
@@ -58,6 +61,9 @@ export default function DashboardRecebimentos() {
       if (imovelSelecionado) {
         url += `&imovelId=${imovelSelecionado}`;
       }
+      if (locatarioSelecionado) {
+        url += `&locatarioId=${locatarioSelecionado}`;
+      }
       const res = await fetch(url);
       const data = await res.json();
       setDashboard(data);
@@ -65,6 +71,16 @@ export default function DashboardRecebimentos() {
       console.error('Erro ao buscar dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLocatarios = async () => {
+    try {
+      const res = await fetch('/api/locatarios');
+      const data = await res.json();
+      setLocatarios(data);
+    } catch (error) {
+      console.error('Erro ao buscar locatários:', error);
     }
   };
 
@@ -84,7 +100,7 @@ export default function DashboardRecebimentos() {
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold mb-4">Dashboard de Recebimentos</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mês
@@ -136,6 +152,20 @@ export default function DashboardRecebimentos() {
                 <option key={imovel.id} value={imovel.id}>
                   {imovel.titulo} - {imovel.locador?.nome ?? ``}
                 </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Locatário</label>
+            <select
+              value={locatarioSelecionado}
+              onChange={(e) => setLocatarioSelecionado(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos os locatários</option>
+              {locatarios.map(l => (
+                <option key={l.id} value={l.id}>{l.nome}</option>
               ))}
             </select>
           </div>

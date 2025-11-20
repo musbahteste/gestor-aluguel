@@ -9,9 +9,15 @@ interface Imovel {
   titulo: string;
 }
 
+interface Locatario {
+  id: number;
+  nome: string;
+}
+
 export default function PagamentoForm() {
   const [form, setForm] = useState({
     imovelId: '',
+    locatarioId: '',
     valor: '',
     dataPagamento: new Date().toISOString().split('T')[0], // Default to today
     dataVencimento: '',
@@ -21,6 +27,7 @@ export default function PagamentoForm() {
     comprovante: '',
   });
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [locatarios, setLocatarios] = useState<Locatario[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -31,6 +38,12 @@ export default function PagamentoForm() {
       setImoveis(data);
     }
     fetchImoveis();
+    async function fetchLocatarios() {
+      const res = await fetch('/api/locatarios');
+      const data = await res.json();
+      setLocatarios(data);
+    }
+    fetchLocatarios();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -70,7 +83,7 @@ export default function PagamentoForm() {
       });
       // Limpa o formulário e força a atualização da lista
       setForm({
-        imovelId: '', valor: '',
+        imovelId: '', locatarioId: '', valor: '',
         dataPagamento: new Date().toISOString().split('T')[0],
         dataVencimento: '', descricao: '',
         status: 'PAGO', metodo: 'PIX',
@@ -98,6 +111,17 @@ export default function PagamentoForm() {
               <option value="">Selecione um imóvel</option>
               {imoveis.map(imovel => (
                 <option key={imovel.id} value={imovel.id}>{imovel.titulo}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Locatário (quem pagou) */}
+          <div>
+            <label htmlFor="locatarioId" className="block text-sm font-medium text-gray-700 mb-1">Locatário (quem pagou)</label>
+            <select id="locatarioId" name="locatarioId" value={form.locatarioId} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Não informar</option>
+              {locatarios.map(l => (
+                <option key={l.id} value={l.id}>{l.nome}</option>
               ))}
             </select>
           </div>

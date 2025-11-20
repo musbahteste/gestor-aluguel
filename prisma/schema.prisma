@@ -29,6 +29,7 @@ model Locatario {
   email     String?
   telefone  String?
   contratos Contrato[]
+  pagamentos Pagamento[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -89,6 +90,8 @@ model Pagamento {
   metodo       String   // "dinheiro", "cheque", "transferencia", "pix"
   status       String   @default("recebido") // "recebido", "pendente", "atrasado"
   comprovante  String?  // Armazena o comprovante em base64
+  locatarioId  Int?
+  locatario    Locatario? @relation(fields: [locatarioId], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -104,4 +107,43 @@ model Gasto {
   arquivo   String?  // URL ou caminho do arquivo/comprovante
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Boleto {
+  id            Int      @id @default(autoincrement())
+  mpPaymentId   String   @unique
+  vencimento    DateTime?
+  url           String
+  valor         Float
+  payerFirstName String
+  payerLastName  String
+  barcode       String?
+  raw           Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Pix {
+  id            Int      @id @default(autoincrement())
+  mpPaymentId   String   @unique
+  qrCodeBase64  String?
+  qrCodeText    String?
+  valor         Float
+  payerFirstName String
+  payerLastName  String
+  raw           Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LinkPagamento {
+  id           Int      @id @default(autoincrement())
+  preferenceId String   @unique
+  firstName    String
+  lastName     String
+  valor        Float
+  link         String
+  raw          Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

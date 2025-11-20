@@ -11,8 +11,8 @@ interface Pagamento {
   status: string;
   imovel: {
     titulo: string;
-    locatario: { nome: string } | null;
   };
+  locatario?: { nome: string } | null;
 }
 
 const statusColors: { [key: string]: string } = {
@@ -23,15 +23,24 @@ const statusColors: { [key: string]: string } = {
 
 export default function PagamentoList() {
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
+  const [locatarios, setLocatarios] = useState<{ id: number; nome: string }[]>([]);
+  const [filterLocatarioId, setFilterLocatarioId] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
     async function fetchPagamentos() {
-      const res = await fetch('/api/pagamentos');
+      const qs = filterLocatarioId ? `?locatarioId=${filterLocatarioId}` : '';
+      const res = await fetch('/api/pagamentos' + qs);
       const data = await res.json();
       setPagamentos(data);
     }
     fetchPagamentos();
+    async function fetchLocatarios() {
+      const res = await fetch('/api/locatarios');
+      const data = await res.json();
+      setLocatarios(data);
+    }
+    fetchLocatarios();
   }, []); // A lista será atualizada via router.refresh()
 
   const handleDelete = async (id: number) => {
@@ -51,8 +60,21 @@ export default function PagamentoList() {
 
   return (
     <div className="bg-white rounded-xl shadow-md">
-      <div className="p-6 border-b">
+      <div className="p-6 border-b flex items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Pagamentos Agendados</h2>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">Filtrar por locatário:</label>
+          <select value={filterLocatarioId} onChange={async (e) => {
+            setFilterLocatarioId(e.target.value);
+            const qs = e.target.value ? `?locatarioId=${e.target.value}` : '';
+            const res = await fetch('/api/pagamentos' + qs);
+            const data = await res.json();
+            setPagamentos(data);
+          }} className="px-3 py-2 border rounded">
+            <option value="">Todos</option>
+            {locatarios.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Layout de Cards para Mobile */}
@@ -69,7 +91,7 @@ export default function PagamentoList() {
               <div className="text-sm text-gray-600 mt-2 space-y-1">
                 <p className="flex items-center"><DollarSign size={14} className="mr-2" /> {formatCurrency(p.valor)}</p>
                 <p className="flex items-center"><Calendar size={14} className="mr-2" /> Vence em: {formatDate(p.dataVencimento)}</p>
-                {p.imovel.locatario && <p className="flex items-center"><User size={14} className="mr-2" /> {p.imovel.locatario.nome}</p>}
+                {p.locatario && <p className="flex items-center"><User size={14} className="mr-2" /> {p.locatario.nome}</p>}
               </div>
               <div className="flex justify-end gap-2 mt-3">
                  <button onClick={() => router.push(`/pagamentos/editar/${p.id}`)} className="p-2 text-gray-500 hover:text-blue-600"><Edit size={16} /></button>
@@ -97,7 +119,7 @@ export default function PagamentoList() {
             {pagamentos.map(p => (
               <tr key={p.id} className="hover:bg-gray-50">
                 <td className="p-4 text-sm text-gray-800">{p.imovel.titulo}</td>
-                <td className="p-4 text-sm text-gray-600">{p.imovel.locatario?.nome || 'N/A'}</td>
+                <td className="p-4 text-sm text-gray-600">{p.locatario?.nome || 'N/A'}</td>
                 <td className="p-4 text-sm text-gray-600">{formatDate(p.dataVencimento)}</td>
                 <td className="p-4 text-sm text-gray-800 font-medium">{formatCurrency(p.valor)}</td>
                 <td className="p-4">

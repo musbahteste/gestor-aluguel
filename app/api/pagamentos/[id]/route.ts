@@ -33,8 +33,9 @@ export async function PUT(
         metodo: data.metodo,
         status: data.status,
         comprovante: data.comprovante,
+        locatarioId: data.locatarioId !== undefined ? (data.locatarioId ? parseInt(data.locatarioId) : null) : undefined,
       },
-      include: { imovel: { include: { locador: true } } },
+      include: { imovel: { include: { locador: true } }, locatario: true },
     });
 
     return NextResponse.json(pagamento);
@@ -95,7 +96,7 @@ export async function GET(
 
     const pagamento = await prisma.pagamento.findUnique({
       where: { id },
-      include: { imovel: { include: { locador: true } } },
+      include: { imovel: { include: { locador: true } }, locatario: true },
     });
 
     if (!pagamento) {
