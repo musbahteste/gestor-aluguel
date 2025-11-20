@@ -51,11 +51,13 @@ export default function DashboardGeral() {
       setLoading(true);
       try {
         const url = `/api/dashboard/geral?mes=${mes}&ano=${ano}&imovelId=${imovelId}`;
+        console.log("Fetching data from:", url); // Log da URL
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error('Falha ao buscar dados da API');
         }
         const dashboardData = await res.json();
+        console.log("Dados recebidos:", dashboardData); // Log dos dados recebidos
         setData(dashboardData);
       } catch (error) {
         console.error('Erro ao buscar dados do dashboard:', error);
@@ -72,14 +74,15 @@ export default function DashboardGeral() {
     return <div className="text-center py-10">Carregando...</div>;
   }
 
-  if (!data) {
+  if (!data || !data.resumoAtual || !data.historicoAnual || !data.imoveis) {
+    console.error("Dados incompletos ou ausentes:", data); // Log de erro
     return <div className="text-center py-10 text-red-500">Erro ao carregar os dados.</div>;
   }
 
   const { resumoAtual, historicoAnual, imoveis } = data;
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="md:p-8 space-y-8">
       <h1 className="text-3xl font-bold text-gray-800">Dashboard Geral</h1>
       
       <div className="bg-white rounded-xl shadow-md p-6">
