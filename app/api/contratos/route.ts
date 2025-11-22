@@ -58,7 +58,27 @@ export async function POST(request: Request) {
       locadorId: data.locadorId,
       locatarioId: data.locatarioId,
       conteudoGerado,
+      dataVencimento: new Date(data.dataVencimento),
+      valorReceber: data.valorReceber,
+      tempoContrato: data.tempoContrato,
     },
   });
+
+  // Gerar contas a receber
+  const contasReceber = [];
+  const dataVencimento = new Date(data.dataVencimento);
+  for (let i = 0; i < data.tempoContrato; i++) {
+    const vencimento = new Date(dataVencimento);
+    vencimento.setMonth(vencimento.getMonth() + i);
+
+    contasReceber.push({
+      contratoId: contrato.id,
+      dataVencimento: vencimento,
+      valor: data.valorReceber,
+    });
+  }
+
+  await prisma.contaReceber.createMany({ data: contasReceber });
+
   return NextResponse.json(contrato);
 }

@@ -24,7 +24,10 @@ export default function ContratoGenerator() {
     templateId: '',
     imovelId: '',
     locadorId: '',
-    locatarioId: ''
+    locatarioId: '',
+    dataVencimento: '',
+    valorReceber: '',
+    tempoContrato: ''
   });
   const router = useRouter();
 
@@ -70,7 +73,7 @@ export default function ContratoGenerator() {
     fetchData();
   }, []);
 
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -85,7 +88,10 @@ export default function ContratoGenerator() {
           templateId: parseInt(form.templateId),
           imovelId: parseInt(form.imovelId),
           locadorId: parseInt(form.locadorId),
-          locatarioId: parseInt(form.locatarioId)
+          locatarioId: parseInt(form.locatarioId),
+          dataVencimento: form.dataVencimento,
+          valorReceber: parseFloat(form.valorReceber),
+          tempoContrato: parseInt(form.tempoContrato)
         })
       });
 
@@ -138,6 +144,46 @@ export default function ContratoGenerator() {
             <option value="">Selecione o locatário</option>
             {locatarios.map(l => <option key={l.id} value={l.id}>{l.nome}</option>)}
           </select>
+        </div>
+
+        <div>
+          <label htmlFor="dataVencimento" className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento *</label>
+          <input
+            type="date"
+            id="dataVencimento"
+            name="dataVencimento"
+            value={form.dataVencimento}
+            onChange={handleChange}
+            className={inputStyle}
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="valorReceber" className="block text-sm font-medium text-gray-700 mb-1">Valor a Receber *</label>
+          <input
+            type="number"
+            step="0.01"
+            id="valorReceber"
+            name="valorReceber"
+            value={form.valorReceber}
+            onChange={handleChange}
+            className={inputStyle}
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="tempoContrato" className="block text-sm font-medium text-gray-700 mb-1">Tempo de Contrato (meses) *</label>
+          <input
+            type="number"
+            id="tempoContrato"
+            name="tempoContrato"
+            value={form.tempoContrato}
+            onChange={handleChange}
+            className={inputStyle}
+            required
+          />
         </div>
 
         <div className="flex justify-end pt-4">

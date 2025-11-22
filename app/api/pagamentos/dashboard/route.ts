@@ -73,8 +73,9 @@ export async function GET(request: Request) {
     const totalGeral = pagamentos.reduce((sum: number, p: any) => sum + p.valor, 0);
 
     // Agrupar por método de pagamento
+    // Corrigir método de pagamento para refletir o método real
     const porMetodo = pagamentos.reduce((acc: Record<string, number>, p: any) => {
-      const metodo = p.metodo || 'Não especificado';
+      const metodo = p.metodo === 'conta-receber' ? p.descricao.split(' ')[2] : p.metodo || 'Não especificado';
       if (!acc[metodo]) {
         acc[metodo] = 0;
       }

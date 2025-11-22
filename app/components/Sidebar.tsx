@@ -20,6 +20,7 @@ const menuLinks = [
   { href: '/dashboard', label: 'Dashboard Geral', icon: LayoutDashboard },
   { href: '/imoveis', label: 'Imóveis', icon: Home },
   { href: '/pagamentos', label: 'Pagamentos', icon: Wallet },
+  { href: '/contas-receber', label: 'Contas a Receber', icon: Wallet },
   { href: '/pagamentos/dashboard', label: 'Dashboard Recebimentos', icon: Receipt },
   { href: '/gastos', label: 'Gastos', icon: Shield },
   { href: '/gastos/dashboard', label: 'Dashboard Gastos', icon: Landmark },

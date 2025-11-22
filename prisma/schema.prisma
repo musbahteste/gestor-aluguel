@@ -77,6 +77,25 @@ model Contrato {
   locatario      Locatario         @relation(fields: [locatarioId], references: [id])
   conteudoGerado String
   dataGeracao    DateTime          @default(now())
+
+  // Novos campos
+  dataVencimento DateTime          // Data de vencimento do contrato
+  valorReceber   Float             // Valor a ser recebido mensalmente
+  tempoContrato  Int               // Tempo de contrato em meses
+
+  contasReceber  ContaReceber[]    // Relacionamento com contas a receber
+}
+
+model ContaReceber {
+  id             Int      @id @default(autoincrement())
+  contratoId     Int
+  contrato       Contrato @relation(fields: [contratoId], references: [id])
+  dataVencimento DateTime // Data de vencimento da conta
+  valor          Float    // Valor da conta
+  status         String   @default("pendente") // "pendente", "atrasado", "recebido"
+  dataRecebimento DateTime? // Data em que foi recebido (se aplicável)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Pagamento {
