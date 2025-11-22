@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import PageWrapper from '@/app/components/PageWrapper';
+import { RefreshCw, Copy, Download } from 'lucide-react';
 
 type PixItem = {
   id: number;
@@ -44,17 +46,23 @@ function CopyQrButton({ item }: { item: PixItem }) {
   const hasQr = !!getQr();
 
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
-      <button onClick={handleCopy} disabled={!hasQr}>
-        Copiar QR
+    <div className="flex gap-2 flex-wrap">
+      <button 
+        onClick={handleCopy} 
+        disabled={!hasQr}
+        className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <Copy size={14} />
+        <span>Copiar QR</span>
       </button>
       {item.qrCodeBase64 && (
         <a
           href={`data:image/png;base64,${item.qrCodeBase64}`}
           download={`pix-${item.id}.png`}
-          style={{ textDecoration: 'none' }}
+          className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
         >
-          <button>Baixar imagem</button>
+          <Download size={14} />
+          <span>Imagem</span>
         </a>
       )}
     </div>
@@ -83,55 +91,59 @@ export default function PixListPage() {
   }, []);
 
   function renderStatus(s?: string | null) {
-    if (!s) return '—';
-    if (s === 'approved') return '✅ PAGAMENTO APROVADO!';
-    if (s === 'pending') return '⏳ Ainda em aberto.';
-    if (s === 'rejected') return '❌ Rejeitado/Cancelado.';
-    if (s.startsWith('error:')) return `Erro na consulta (${s.replace('error:', '')})`;
-    return s;
+    if (!s) return <span className="text-gray-400">—</span>;
+    if (s === 'approved') return <span className="inline-block px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">✅ APROVADO</span>;
+    if (s === 'pending') return <span className="inline-block px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">⏳ PENDENTE</span>;
+    if (s === 'rejected') return <span className="inline-block px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">❌ REJEITADO</span>;
+    if (s.startsWith('error:')) return <span className="text-red-600 text-xs">Erro na consulta</span>;
+    return <span className="text-gray-600 text-xs">{s}</span>;
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>Listagem de PIX</h1>
-        <div>
-          <button onClick={load} disabled={loading} style={{ marginRight: 8 }}>
-            {loading ? 'Carregando...' : 'Atualizar'}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
+    <PageWrapper
+      title="Listagem de PIX"
+      actionButton={
+        <button 
+          onClick={load} 
+          disabled={loading}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+        >
+          <RefreshCw size={18} />
+          <span>{loading ? 'Carregando...' : 'Atualizar'}</span>
+        </button>
+      }
+    >
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>ID</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>MP Payment ID</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Nome</th>
-              <th style={{ textAlign: 'right', borderBottom: '1px solid #ddd', padding: 8 }}>Valor</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Criado em</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: 8 }}>Status</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">ID</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">MP Payment ID</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">Nome</th>
+              <th className="text-right p-3 text-sm font-semibold text-gray-700">Valor</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">Criado em</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">Status</th>
+              <th className="text-left p-3 text-sm font-semibold text-gray-700">Ações</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: 12 }}>
+                <td colSpan={7} className="p-8 text-center text-gray-500">
                   Nenhum PIX encontrado.
                 </td>
               </tr>
             )}
 
             {items.map((it) => (
-              <tr key={it.id}>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{it.id}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{it.mpPaymentId ?? '—'}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{`${it.payerFirstName ?? ''} ${it.payerLastName ?? ''}`.trim() || '—'}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0', textAlign: 'right' }}>{it.valor != null ? `R$ ${Number(it.valor).toFixed(2)}` : '—'}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{it.createdAt ? new Date(it.createdAt).toLocaleString() : '—'}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>{renderStatus(it.mpStatus)}</td>
-                <td style={{ padding: 8, borderBottom: '1px solid #f0f0f0' }}>
+              <tr key={it.id} className="border-b border-gray-200 hover:bg-gray-50">
+                <td className="p-3 text-sm">{it.id}</td>
+                <td className="p-3 text-sm">{it.mpPaymentId ?? '—'}</td>
+                <td className="p-3 text-sm">{`${it.payerFirstName ?? ''} ${it.payerLastName ?? ''}`.trim() || '—'}</td>
+                <td className="p-3 text-sm text-right">{it.valor != null ? `R$ ${Number(it.valor).toFixed(2)}` : '—'}</td>
+                <td className="p-3 text-sm">{it.createdAt ? new Date(it.createdAt).toLocaleString() : '—'}</td>
+                <td className="p-3 text-sm">{renderStatus(it.mpStatus)}</td>
+                <td className="p-3 text-sm">
                   <CopyQrButton item={it} />
                 </td>
               </tr>
@@ -139,6 +151,6 @@ export default function PixListPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

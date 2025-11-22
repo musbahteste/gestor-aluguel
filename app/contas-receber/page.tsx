@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import PageWrapper from '@/app/components/PageWrapper';
 
 interface ContaReceber {
   id: number;
@@ -48,11 +49,10 @@ export default function ContasReceberPage() {
     }
   };
 
-  if (loading) return <div className="text-center py-8 text-gray-500">Carregando contas a receber...</div>;
+  if (loading) return <PageWrapper title="Contas a Receber"><div className="text-center py-8 text-gray-500">Carregando contas a receber...</div></PageWrapper>;
 
   return (
-    <main className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Contas a Receber</h1>
+    <PageWrapper title="Contas a Receber">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {contas.map((conta) => (
           <div key={conta.id} className="p-6 bg-white border rounded-lg shadow-md flex flex-col justify-between">
@@ -83,6 +83,6 @@ export default function ContasReceberPage() {
           </div>
         ))}
       </div>
-    </main>
+    </PageWrapper>
   );
 }

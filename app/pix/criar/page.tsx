@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import PageWrapper from '../../components/PageWrapper';
 
 export default function CriarPixPage() {
   const [amount, setAmount] = useState('75.90');
@@ -67,55 +68,106 @@ export default function CriarPixPage() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Gerar PIX</h1>
-      <form onSubmit={handleSubmit} style={{ maxWidth: 560 }}>
-        <div style={{ marginBottom: 8 }}>
-          <label>Valor (R$)</label>
-          <input value={amount} onChange={(e) => setAmount(e.target.value)} />
+    <PageWrapper title="Gerar PIX">
+      <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 bg-white p-6 rounded-lg shadow">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+          <input 
+            type="text"
+            value={amount} 
+            onChange={(e) => setAmount(e.target.value)} 
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label>Nome</label>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+            <input 
+              type="text"
+              value={firstName} 
+              onChange={(e) => setFirstName(e.target.value)} 
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
           <div>
-            <label>Sobrenome</label>
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
+            <input 
+              type="text"
+              value={lastName} 
+              onChange={(e) => setLastName(e.target.value)} 
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
         </div>
 
-        <div style={{ marginTop: 8 }}>
-          <label>E-mail</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input 
+            type="email"
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
 
-        <div style={{ marginTop: 8 }}>
-          <label>CPF</label>
-          <input value={cpf} onChange={(e) => setCpf(e.target.value)} />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+          <input 
+            type="text"
+            value={cpf} 
+            onChange={(e) => setCpf(e.target.value)} 
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
 
-        <div style={{ marginTop: 12 }}>
-          <button type="submit" disabled={loading}>{loading ? 'Gerando...' : 'Gerar PIX'}</button>
+        <div className="pt-4">
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            {loading ? 'Gerando...' : 'Gerar PIX'}
+          </button>
         </div>
-        {error && <div style={{ color: 'red', marginTop: 12 }}>{error}</div>}
+        {error && <div className="text-red-600 text-sm mt-4">{error}</div>}
       </form>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowModal(false)}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', padding: 16, borderRadius: 8, width: 420, textAlign: 'center' }}>
-            <h3>PIX Gerado</h3>
-            {qrBase64 ? <img src={`data:image/png;base64,${qrBase64}`} alt="QR" style={{ maxWidth: '100%' }} /> : <div style={{ padding: 12, background: '#f5f5f5' }}>QR não disponível</div>}
-            <div style={{ marginTop: 12 }}>
-              <button onClick={copyQrText} style={{ marginRight: 8 }}>Copiar Código</button>
-              <button onClick={downloadQr} style={{ marginRight: 8 }}>Baixar Imagem</button>
-              <button onClick={() => setShowModal(false)}>Fechar</button>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white p-6 rounded-lg w-96 text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">PIX Gerado</h3>
+            {qrBase64 ? (
+              <img src={`data:image/png;base64,${qrBase64}`} alt="QR" className="w-full max-w-sm mx-auto" />
+            ) : (
+              <div className="p-3 bg-gray-100 rounded">QR não disponível</div>
+            )}
+            <div className="mt-4 flex gap-2 justify-center flex-wrap">
+              <button 
+                onClick={copyQrText} 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Copiar Código
+              </button>
+              <button 
+                onClick={downloadQr} 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Baixar Imagem
+              </button>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
+              >
+                Fechar
+              </button>
             </div>
-            {qrText && <pre style={{ textAlign: 'left', marginTop: 12, background: '#fafafa', padding: 8, borderRadius: 4, overflowX: 'auto' }}>{qrText}</pre>}
+            {qrText && (
+              <pre className="mt-4 text-left bg-gray-50 p-3 rounded text-xs overflow-x-auto">{qrText}</pre>
+            )}
           </div>
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

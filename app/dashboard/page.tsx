@@ -1,9 +1,10 @@
 import DashboardGeral from "../components/DashboardGeral";
+import PageWrapper from "../components/PageWrapper";
 
 export default function DashboardPage() {
   return (
-    <div className="container mx-auto py-8">
+    <>
       <DashboardGeral />
-    </div>
+    </>
   );
 }

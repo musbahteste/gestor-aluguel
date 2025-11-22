@@ -8,12 +8,14 @@ interface PageWrapperProps {
 
 export default function PageWrapper({ title, children, actionButton }: PageWrapperProps) {
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+    <div className="w-full h-full flex flex-col p-6 md:p-8">
+      <div className="flex justify-between items-center flex-wrap gap-4 mb-8">
         <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
         {actionButton}
       </div>
-      {children}
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
