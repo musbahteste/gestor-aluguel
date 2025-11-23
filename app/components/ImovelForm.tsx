@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 
 interface Locador {
   id: number;
   nome: string;
 }
 
-export default function ImovelForm() {
+interface ImovelFormProps {
+  imovelId?: number;
+}
+
+export default function ImovelForm({ imovelId }: ImovelFormProps) {
   const [loading, setLoading] = useState(false);
   const [locadores, setLocadores] = useState<Locador[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     titulo: '',
     descricao: '',
@@ -38,6 +43,37 @@ export default function ImovelForm() {
     fetchLocadores();
   }, []);
 
+  useEffect(() => {
+    // Se tem imovelId, está em modo de edição
+    if (imovelId) {
+      setIsEditing(true);
+      const fetchImovel = async () => {
+        try {
+          const res = await fetch(`/api/imoveis/${imovelId}`);
+          const data = await res.json();
+          setForm({
+            titulo: data.titulo || '',
+            descricao: data.descricao || '',
+            endereco: data.endereco || '',
+            cidade: data.cidade || '',
+            bairro: data.bairro || '',
+            cep: data.cep || '',
+            valorAluguel: data.valorAluguel?.toString() || '',
+            area: data.area?.toString() || '',
+            quartos: data.quartos?.toString() || '',
+            banheiros: data.banheiros?.toString() || '',
+            garagem: data.garagem || false,
+            locadorId: data.locadorId?.toString() || '',
+          });
+        } catch (error) {
+          console.error("Erro ao buscar imóvel", error);
+          alert("Não foi possível carregar os dados do imóvel.");
+        }
+      };
+      fetchImovel();
+    }
+  }, [imovelId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -52,19 +88,26 @@ export default function ImovelForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch('/api/imoveis', {
-        method: 'POST',
+      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing ? `/api/imoveis/${imovelId}` : '/api/imoveis';
+      
+      await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       router.push('/imoveis');
       router.refresh();
     } catch (error) {
-      console.error("Erro ao criar imóvel", error);
-      alert("Não foi possível criar o imóvel.");
+      console.error("Erro ao salvar imóvel", error);
+      alert("Não foi possível salvar o imóvel.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    router.back();
   };
 
   return (
@@ -137,10 +180,14 @@ export default function ImovelForm() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-3 pt-4">
+          <button type="button" onClick={handleCancel} className="flex items-center justify-center gap-2 bg-gray-400 text-white px-6 py-2.5 rounded-lg shadow-sm hover:bg-gray-500 transition-colors">
+            <X size={18} />
+            Cancelar
+          </button>
           <button type="submit" disabled={loading} className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
             <Save size={18} />
-            {loading ? 'Salvando...' : 'Salvar Imóvel'}
+            {loading ? 'Salvando...' : isEditing ? 'Atualizar Imóvel' : 'Salvar Imóvel'}
           </button>
         </div>
       </form>
