@@ -1,6 +1,7 @@
 'use client';
 import useSWR from 'swr';
 import { User, Mail, Phone } from 'lucide-react';
+import Link from 'next/link';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -18,10 +19,10 @@ const SkeletonCard = () => (
 );
 
 export default function LocatarioList() {
-  const { data, error } = useSWR('/api/locatarios', fetcher);
+  const { data, error, isLoading } = useSWR('/api/locatarios', fetcher);
 
   if (error) return <div className="text-center text-red-500 py-10">Erro ao carregar locatários.</div>;
-  if (!data) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
@@ -29,34 +30,44 @@ export default function LocatarioList() {
     );
   }
 
+  const locatarios = Array.isArray(data) ? data : [];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {data.map((locatario: any) => (
-        <div key={locatario.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:scale-105 hover:shadow-lg">
-          <div className="p-6">
-            <div className="flex items-center mb-4">
-              <div className="bg-teal-100 p-3 rounded-full mr-4">
-                <User className="h-6 w-6 text-teal-600" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 truncate">{locatario.nome}</h2>
-            </div>
-            <div className="space-y-3 text-sm text-gray-600">
-              {locatario.email && (
-                <div className="flex items-center">
-                  <Mail size={16} className="mr-2 text-gray-400" />
-                  <span>{locatario.email}</span>
-                </div>
-              )}
-              {locatario.telefone && (
-                <div className="flex items-center">
-                  <Phone size={16} className="mr-2 text-gray-400" />
-                  <span>{locatario.telefone}</span>
-                </div>
-              )}
-            </div>
-          </div>
+      {locatarios.length === 0 && !isLoading ? (
+        <div className="col-span-full text-center py-10 text-gray-500">
+          Nenhum locatário cadastrado ainda.
         </div>
-      ))}
+      ) : (
+        locatarios.map((locatario: any) => (
+          <Link key={locatario.id} href={`/locatarios/${locatario.id}/editar`}>
+            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:scale-105 hover:shadow-lg cursor-pointer h-full">
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="bg-teal-100 p-3 rounded-full mr-4">
+                    <User className="h-6 w-6 text-teal-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800 truncate">{locatario.nome}</h2>
+                </div>
+                <div className="space-y-3 text-sm text-gray-600">
+                  {locatario.email && (
+                    <div className="flex items-center">
+                      <Mail size={16} className="mr-2 text-gray-400" />
+                      <span>{locatario.email}</span>
+                    </div>
+                  )}
+                  {locatario.telefone && (
+                    <div className="flex items-center">
+                      <Phone size={16} className="mr-2 text-gray-400" />
+                      <span>{locatario.telefone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))
+      )}
     </div>
   );
 }
